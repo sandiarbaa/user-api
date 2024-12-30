@@ -100,7 +100,8 @@ export const getAllUsers = async (req: Request, res: Response) => {
  *                   properties:
  *                     id:
  *                       type: string
- *                       example: "123"
+ *                       format: uuid
+ *                       example: "550e8400-e29b-41d4-a716-446655440000"
  *                     name:
  *                       type: string
  *                       example: "John Doe"
@@ -114,6 +115,9 @@ export const getAllUsers = async (req: Request, res: Response) => {
  *             schema:
  *               type: object
  *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 404
  *                 message:
  *                   type: string
  *                   example: User not found
@@ -124,6 +128,9 @@ export const getAllUsers = async (req: Request, res: Response) => {
  *             schema:
  *               type: object
  *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                   example: 500
  *                 message:
  *                   type: string
  *                   example: Internal server error
@@ -225,6 +232,129 @@ export const createUser = async (req: Request, res: Response) => {
       statusCode: 201,
       message: "User created successfully",
       data: newUser,
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error });
+    return;
+  }
+};
+
+// Update User
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update a user's information
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Jane Doe"
+ *               email:
+ *                 type: string
+ *                 example: "janedoe@gmail.com"
+ *               age:
+ *                 type: integer
+ *                 example: 30
+ *     responses:
+ *       200:
+ *         description: User successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User successfully updated
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       example: "550e8400-e29b-41d4-a716-446655440000"
+ *                     name:
+ *                       type: string
+ *                       example: "Jane Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "janedoe@gmail.com"
+ *                     age:
+ *                       type: integer
+ *                       example: 30
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 error:
+ *                   type: object
+ */
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, email, age } = req.body;
+
+    // Find user
+    const findUser = await prisma.user.findUnique({ where: { id } });
+
+    // Checking if user don't exist
+    if (!findUser) {
+      res.status(404).json({ statusCode: 404, message: "User not found" });
+      return;
+    }
+
+    // Update user
+    const updatedUser: UserType | null = await prisma.user.update({
+      where: { id },
+      data: { name, email, age },
+    });
+
+    // Response
+    res.status(200).json({
+      statusCode: 200,
+      message: "User successfully updated",
+      data: updatedUser,
     });
     return;
   } catch (error) {
