@@ -425,6 +425,9 @@ export const updateUser = async (req: Request, res: Response) => {
  *             schema:
  *               type: object
  *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                   example: 404
  *                 message:
  *                   type: string
  *                   example: User not found

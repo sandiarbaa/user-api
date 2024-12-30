@@ -18,6 +18,9 @@ export default app; // Tambahkan ini untuk ekspor default
 
 const PORT = process.env.PORT || 3000;
 
+// jika sedang testing tidak akan dijalankan, syarat ubah variabel NODE_ENV
 if (process.env.NODE_ENV !== "test") {
-  app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
+  app.listen(PORT, () =>
+    console.log(`Server running on port http://localhost:${PORT}`)
+  );
 }
