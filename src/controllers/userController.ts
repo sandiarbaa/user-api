@@ -65,3 +65,65 @@ export const getAllUsers = async (req: Request, res: Response) => {
     return;
   }
 };
+
+// Create User
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               email:
+ *                 type: string
+ *                 example: "johndoe@gmail.com"
+ *               age:
+ *                 type: integer
+ *                 example: 25
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 201
+ *                 message:
+ *                   type: string
+ *                   example: User created successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ */
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const { name, email, age } = req.body;
+
+    // Create user
+    const newUser: UserType | null = await prisma.user.create({
+      data: { name, email, age },
+    });
+
+    // Responsse
+    res.status(201).json({
+      statusCode: 201,
+      message: "User created successfully",
+      data: newUser,
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error });
+    return;
+  }
+};
