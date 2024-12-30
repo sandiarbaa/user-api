@@ -46,6 +46,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
     // Get all user
     const users: UserType[] = await prisma.user.findMany();
 
+    // Checking if data is empty
     if (users.length === 0) {
       res.status(200).json({
         statusCode: 200,
@@ -63,6 +64,96 @@ export const getAllUsers = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: "Internal server error", error });
     return;
+  }
+};
+
+// Get User by ID
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Retrieve a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: User found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User found
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "123"
+ *                     name:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "johndoe@gmail.com"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 error:
+ *                   type: object
+ */
+
+export const getUserById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Find user
+    const findUser = await prisma.user.findUnique({ where: { id } });
+
+    // Checking
+    if (!findUser) {
+      res.status(404).json({ statusCode: 404, message: "User not found" });
+      return;
+    }
+
+    // Response
+    res
+      .status(200)
+      .json({ statusCode: 200, message: "User found", data: findUser });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error });
   }
 };
 
@@ -115,12 +206,13 @@ export const createUser = async (req: Request, res: Response) => {
       where: { email },
     });
 
+    // Checking
     if (existingUser) {
       res.status(400).json({
         statusCode: 400,
         message: "Email already exists",
       });
-      return
+      return;
     }
 
     // Create user if user dont exist
